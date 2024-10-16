@@ -13,6 +13,7 @@ import android.os.*
 import android.provider.Settings
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.example.apptopicos.controllers.RegisterController
 import com.example.apptopicos.views.ViewButtonActivity
 
 class MyService : Service() {
@@ -20,9 +21,11 @@ class MyService : Service() {
     private lateinit var volumeObserver: ContentObserver
     private var previousVolume: Int = 0
     private var Modo: Boolean = false
+    private lateinit var registerController: RegisterController
 
     override fun onCreate() {
         super.onCreate()
+        registerController = RegisterController()
         Log.d("MiApp", "Servicio creado") // Log para servicio creado
 
         val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
@@ -94,6 +97,7 @@ class MyService : Service() {
         } catch (e: PendingIntent.CanceledException) {
             Log.e("MiApp", "Error al lanzar Activity: ${e.message}")
         }
+        registerController.starRegister()
     }
 
     private fun desactivar_escucha() {
