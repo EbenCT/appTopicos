@@ -7,8 +7,7 @@
         android:id="@+id/fullscreen_button"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="Escuchar"
-        android:textSize="24sp"
         android:gravity="center"
-        android:background="?android:attr/selectableItemBackground" />
+        android:text="Boton"
+        android:textSize="24sp" />
 </RelativeLayout>

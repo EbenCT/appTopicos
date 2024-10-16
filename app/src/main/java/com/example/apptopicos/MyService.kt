@@ -2,11 +2,13 @@ package com.example.apptopicos
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.database.ContentObserver
 import android.media.AudioManager
+import android.net.Uri
 import android.os.*
 import android.provider.Settings
 import android.util.Log
@@ -61,7 +63,16 @@ class MyService : Service() {
 
     private fun verificar_swich() {
         if (Modo) {
-            activar_escucha() // Llama a activar_escucha si Modo está en true
+            if (!Settings.canDrawOverlays(this)) {
+                val intent = Intent(
+                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:$packageName")
+                )
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                startActivity(intent)
+            } else {
+                activar_escucha() // Solo ejecuta si tienes permiso
+            }
         } else {
             desactivar_escucha() // Llama a desactivar_escucha si Modo está en false
         }
@@ -71,10 +82,18 @@ class MyService : Service() {
         Log.d("MiApp", "Activando escucha...")
 
         val intent = Intent(this, ViewButtonActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-        startActivity(intent)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
-        Log.d("MiApp", "Activity en primer plano")
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        try {
+            pendingIntent.send()  // Inicia el Activity usando el PendingIntent
+            Log.d("MiApp", "Activity lanzada con PendingIntent")
+        } catch (e: PendingIntent.CanceledException) {
+            Log.e("MiApp", "Error al lanzar Activity: ${e.message}")
+        }
     }
 
     private fun desactivar_escucha() {
