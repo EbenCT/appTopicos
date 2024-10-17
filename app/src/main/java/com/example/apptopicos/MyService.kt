@@ -8,12 +8,15 @@ import android.content.Context
 import android.content.Intent
 import android.database.ContentObserver
 import android.media.AudioManager
+import android.media.RingtoneManager
 import android.net.Uri
 import android.os.*
 import android.provider.Settings
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.example.apptopicos.controllers.AutoDesactivityController
 import com.example.apptopicos.controllers.RegisterController
+import com.example.apptopicos.controllers.SOController
 import com.example.apptopicos.views.ViewButtonActivity
 
 class MyService : Service() {
@@ -22,10 +25,13 @@ class MyService : Service() {
     private var previousVolume: Int = 0
     private var Modo: Boolean = false
     private lateinit var registerController: RegisterController
-
+    private lateinit var autodesactivityController: AutoDesactivityController
+    private lateinit var soController: SOController
     override fun onCreate() {
         super.onCreate()
         registerController = RegisterController()
+        autodesactivityController = AutoDesactivityController()
+        soController = SOController(this)
         Log.d("MiApp", "Servicio creado") // Log para servicio creado
 
         val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
@@ -98,12 +104,34 @@ class MyService : Service() {
             Log.e("MiApp", "Error al lanzar Activity: ${e.message}")
         }
         registerController.starRegister()
+        autodesactivityController.starAutodesactivity()
+
+        // Reproducir sonido de confirmación
+        val soundUri = Uri.parse("android.resource://" + packageName + "/" + R.raw.mario_bros_vida)
+        val ringtone = RingtoneManager.getRingtone(applicationContext, soundUri)
+        ringtone.play()
     }
 
     private fun desactivar_escucha() {
-        Log.d("MiApp", "Desactivando escucha...") // Implementación futura
-        // Aquí se agregará la lógica para desactivar el reconocimiento o escucha
+        Log.d("MiApp", "Desactivando escucha...")
+
+        // Enviar broadcast para cerrar el Activity
+        val intent = Intent("com.example.apptopicos.CLOSE_ACTIVITY")
+        sendBroadcast(intent)
+        //Apagar camara si es que esta activa
+        soController.disableCameraIfActive()
+        // Apagar el registro y la auto-desactivación
+        registerController.offRegister()
+        autodesactivityController.offAutodesactivity()
+
+        // Reproducir sonido de apagado
+        val soundUri = Uri.parse("android.resource://" + packageName + "/" + R.raw.mario_bros_tuberia)
+        val ringtone = RingtoneManager.getRingtone(applicationContext, soundUri)
+        ringtone.play()
+
+        Log.d("MiApp", "Escucha desactivada")
     }
+
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.d("MiApp", "onStartCommand llamado") // Log para inicio del servicio
@@ -113,12 +141,10 @@ class MyService : Service() {
     }
 
     private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel("running_channel",
-                "Mi Canal", NotificationManager.IMPORTANCE_DEFAULT)
-            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            manager.createNotificationChannel(channel)
-        }
+        val channel = NotificationChannel("running_channel",
+            "Mi Canal", NotificationManager.IMPORTANCE_DEFAULT)
+        val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        manager.createNotificationChannel(channel)
     }
 
     private fun startServiceForeground() {
