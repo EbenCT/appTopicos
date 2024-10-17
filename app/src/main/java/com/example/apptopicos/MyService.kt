@@ -61,6 +61,7 @@ class MyService : Service() {
         override fun onReceive(context: Context?, intent: Intent?) {
             when (intent?.action) {
                 "com.example.apptopicos.DESACTIVAR_ESCUCHA" -> {
+                    Modo = !Modo
                     desactivar_escucha() // Llama a la función cuando recibas el broadcast
                 }
             }
