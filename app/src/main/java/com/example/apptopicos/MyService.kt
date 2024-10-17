@@ -151,7 +151,6 @@ class MyService : Service() {
         Log.d("MiApp", "Escucha desactivada")
     }
 
-
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.d("MiApp", "onStartCommand llamado") // Log para inicio del servicio
         createNotificationChannel()
