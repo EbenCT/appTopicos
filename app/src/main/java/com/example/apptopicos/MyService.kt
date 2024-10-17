@@ -4,8 +4,10 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.database.ContentObserver
 import android.media.AudioManager
 import android.media.RingtoneManager
@@ -30,7 +32,7 @@ class MyService : Service() {
     override fun onCreate() {
         super.onCreate()
         registerController = RegisterController()
-        autodesactivityController = AutoDesactivityController()
+        autodesactivityController = AutoDesactivityController(registerController, this)
         soController = SOController(this)
         Log.d("MiApp", "Servicio creado") // Log para servicio creado
 
@@ -48,6 +50,21 @@ class MyService : Service() {
         contentResolver.registerContentObserver(
             Settings.System.CONTENT_URI, true, volumeObserver
         )
+
+        // Registra el broadcast receiver
+        val filter = IntentFilter("com.example.apptopicos.DESACTIVAR_ESCUCHA")
+        registerReceiver(receiver, filter)
+    }
+
+    // BroadcastReceiver para escuchar los cambios y desactivar escucha
+    private val receiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            when (intent?.action) {
+                "com.example.apptopicos.DESACTIVAR_ESCUCHA" -> {
+                    desactivar_escucha() // Llama a la función cuando recibas el broadcast
+                }
+            }
+        }
     }
 
     private fun detectarPulsacion() {
@@ -66,7 +83,7 @@ class MyService : Service() {
             }
         }
         previousVolume = currentVolume
-
+        registerController.logEvent("Se detecto pulsacion")
         verificar_swich()
     }
 
@@ -110,11 +127,12 @@ class MyService : Service() {
         val soundUri = Uri.parse("android.resource://" + packageName + "/" + R.raw.mario_bros_vida)
         val ringtone = RingtoneManager.getRingtone(applicationContext, soundUri)
         ringtone.play()
+        registerController.logEvent("Modo escucha Activado")
     }
 
-    private fun desactivar_escucha() {
+    fun desactivar_escucha() {
         Log.d("MiApp", "Desactivando escucha...")
-
+        registerController.logEvent("Desactivando escucha")
         // Enviar broadcast para cerrar el Activity
         val intent = Intent("com.example.apptopicos.CLOSE_ACTIVITY")
         sendBroadcast(intent)
@@ -159,5 +177,9 @@ class MyService : Service() {
     }
     override fun onBind(intent: Intent): IBinder? {
         return null
+    }
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(receiver) // Desregistrar el receptor
     }
 }
