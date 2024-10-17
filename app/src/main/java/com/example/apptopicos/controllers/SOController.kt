@@ -21,7 +21,8 @@ class SOController(private val context: Context) {
     private var speechRecognizer: SpeechRecognizer? = null
     private var isListening: Boolean = false
     private var capturedText: StringBuilder = StringBuilder()
-    private lateinit var registerController: RegisterController
+    private var registerController: RegisterController = RegisterController()
+    private var comunicadorController: ComunicadorController = ComunicadorController(context)
 
     // Verifica si la cámara está activa, pero primero comprueba si tiene permiso
     fun isCameraActive(): Boolean {
@@ -117,7 +118,7 @@ class SOController(private val context: Context) {
         } else {
             Log.e("SOController", "El reconocimiento de voz no está disponible")
         }
-        registerController = RegisterController()
+        registerController.starRegister()
         registerController.logEvent("Microfono activado")
     }
 
@@ -128,9 +129,14 @@ class SOController(private val context: Context) {
             speechRecognizer?.destroy()
             isListening = false
             Log.d("SOController", "Micrófono desactivado")
-            Log.d("SOController", "Texto capturado: $capturedText")
+
+            // Texto capturado que será enviado al ComunicadorController
+            val mensajeCapturado = capturedText.toString().trim()
+            Log.d("SOController", "Texto capturado: $mensajeCapturado")
+            // Llamar a la función escuchar del ComunicadorController y enviarle el mensaje capturado
+            comunicadorController.escuchar(mensajeCapturado)
+
             capturedText.clear() // Limpiar el buffer de texto para la próxima vez
-            registerController = RegisterController()
             registerController.logEvent("Microfono desactivado")
         }
     }

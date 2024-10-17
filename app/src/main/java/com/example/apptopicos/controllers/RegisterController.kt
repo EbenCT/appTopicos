@@ -35,7 +35,7 @@ class RegisterController {
         if (isRegistering) {
             val timestamp = System.currentTimeMillis()
             eventLog.add(Event(description, timestamp))
-            Log.d("RegisterController", "Evento registrado: $description a las ${formatDate(timestamp)}")
+            Log.d("MiApp", "Evento registrado: $description a las ${formatDate(timestamp)}")
         }
     }
 
