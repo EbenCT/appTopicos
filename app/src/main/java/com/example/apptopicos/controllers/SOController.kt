@@ -21,7 +21,7 @@ class SOController(private val context: Context) {
     private var speechRecognizer: SpeechRecognizer? = null
     private var isListening: Boolean = false
     private var capturedText: StringBuilder = StringBuilder()
-    private var registerController: RegisterController = RegisterController()
+    private var registerController: RegisterController = RegisterController(context)
     private var comunicadorController: ComunicadorController = ComunicadorController(context)
 
     // Verifica si la cámara está activa, pero primero comprueba si tiene permiso
@@ -73,6 +73,10 @@ class SOController(private val context: Context) {
         }
     }
     fun activarMicrofono() {
+
+        registerController.starRegister()
+        registerController.logEvent("Microfono activado")
+
         if (SpeechRecognizer.isRecognitionAvailable(context)) {
             speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context)
             val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
@@ -118,12 +122,15 @@ class SOController(private val context: Context) {
         } else {
             Log.e("SOController", "El reconocimiento de voz no está disponible")
         }
-        registerController.starRegister()
-        registerController.logEvent("Microfono activado")
+
     }
 
     // Desactivar el micrófono y detener la conversión de voz a texto
     fun desactivarMicrofono() {
+
+        registerController.starRegister()
+        registerController.logEvent("Microfono desactivado")
+
         if (isListening) {
             speechRecognizer?.stopListening()
             speechRecognizer?.destroy()
@@ -137,7 +144,7 @@ class SOController(private val context: Context) {
             comunicadorController.escuchar(mensajeCapturado)
 
             capturedText.clear() // Limpiar el buffer de texto para la próxima vez
-            registerController.logEvent("Microfono desactivado")
+
         }
     }
 }

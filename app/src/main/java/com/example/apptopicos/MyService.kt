@@ -31,8 +31,8 @@ class MyService : Service() {
     private lateinit var soController: SOController
     override fun onCreate() {
         super.onCreate()
-        registerController = RegisterController()
-        autodesactivityController = AutoDesactivityController(registerController, this)
+        registerController = RegisterController(this)
+        autodesactivityController = AutoDesactivityController(this, registerController)
         soController = SOController(this)
         Log.d("MiApp", "Servicio creado") // Log para servicio creado
 
@@ -125,10 +125,21 @@ class MyService : Service() {
         autodesactivityController.starAutodesactivity()
 
         // Reproducir sonido de confirmación
-        val soundUri = Uri.parse("android.resource://" + packageName + "/" + R.raw.mario_bros_vida)
-        val ringtone = RingtoneManager.getRingtone(applicationContext, soundUri)
-        ringtone.play()
+        señalSonora()
+
         registerController.logEvent("Modo escucha Activado")
+    }
+    private fun señalSonora(){
+        if(Modo) {
+            val soundUri =
+                Uri.parse("android.resource://" + packageName + "/" + R.raw.mario_bros_vida)
+            val ringtone = RingtoneManager.getRingtone(applicationContext, soundUri)
+            ringtone.play()
+        }else{
+            val soundUri = Uri.parse("android.resource://" + packageName + "/" + R.raw.mario_bros_tuberia)
+            val ringtone = RingtoneManager.getRingtone(applicationContext, soundUri)
+            ringtone.play()
+        }
     }
 
     fun desactivar_escucha() {
@@ -144,9 +155,7 @@ class MyService : Service() {
         autodesactivityController.offAutodesactivity()
 
         // Reproducir sonido de apagado
-        val soundUri = Uri.parse("android.resource://" + packageName + "/" + R.raw.mario_bros_tuberia)
-        val ringtone = RingtoneManager.getRingtone(applicationContext, soundUri)
-        ringtone.play()
+        señalSonora()
 
         Log.d("MiApp", "Escucha desactivada")
     }
