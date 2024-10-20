@@ -21,13 +21,13 @@ class SOController(private val context: Context) {
     private var speechRecognizer: SpeechRecognizer? = null
     private var isListening: Boolean = false
     private var capturedText: StringBuilder = StringBuilder()
+    private var buttonReleased: Boolean = false // Para rastrear si el botón sigue presionado
     private var registerController: RegisterController = RegisterController(context)
     private var comunicadorController: ComunicadorController = ComunicadorController(context)
 
-    // Verifica si la cámara está activa, pero primero comprueba si tiene permiso
+    // Mantener la cámara activa o apagarla
     fun isCameraActive(): Boolean {
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
-            != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             Log.e("SOController", "Permiso de cámara no concedido")
             return false
         }
@@ -67,15 +67,16 @@ class SOController(private val context: Context) {
     fun disableCameraIfActive() {
         if (isCameraActive()) {
             Log.d("SOController", "Desactivando la cámara...")
-            // Aquí se puede realizar la lógica para desactivar la cámara.
         } else {
             Log.d("SOController", "La cámara no está activa, no se requiere desactivación.")
         }
     }
-    fun activarMicrofono() {
 
+    // Mantener el micrófono activo mientras el botón esté presionado
+    fun activarMicrofono() {
+        buttonReleased = false // Reiniciamos la bandera
         registerController.starRegister()
-        registerController.logEvent("Microfono activado")
+        registerController.logEvent("Micrófono activado")
 
         if (SpeechRecognizer.isRecognitionAvailable(context)) {
             speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context)
@@ -98,10 +99,12 @@ class SOController(private val context: Context) {
 
                 override fun onEndOfSpeech() {
                     Log.d("SOController", "Fin de la conversación")
+                    // Aquí no apagamos el micrófono inmediatamente. Esperamos a que el reconocimiento termine.
                 }
 
                 override fun onError(error: Int) {
                     Log.e("SOController", "Error durante el reconocimiento de voz: $error")
+                    desactivarMicrofono()
                 }
 
                 override fun onResults(results: Bundle?) {
@@ -109,6 +112,8 @@ class SOController(private val context: Context) {
                     matches?.let {
                         capturedText.append(it[0]).append(" ") // Acumular el texto capturado
                     }
+                    Log.d("SOController", "Texto capturado sin soltar boton: ${capturedText.toString().trim()}")
+                    finalizarCapturaVoz()
                 }
 
                 override fun onPartialResults(partialResults: Bundle?) {}
@@ -122,15 +127,20 @@ class SOController(private val context: Context) {
         } else {
             Log.e("SOController", "El reconocimiento de voz no está disponible")
         }
-
     }
 
-    // Desactivar el micrófono y detener la conversión de voz a texto
     fun desactivarMicrofono() {
+        // Marcamos que el botón ha sido soltado
+        buttonReleased = true
+        Log.d("SOController", "Botón soltado, esperando a que termine el reconocimiento de voz")
 
-        registerController.starRegister()
-        registerController.logEvent("Microfono desactivado")
+        // Si ya terminó de capturar el texto, finalizamos la captura de voz
+        if (!isListening) {
+            finalizarCapturaVoz()
+        }
+    }
 
+    private fun finalizarCapturaVoz() {
         if (isListening) {
             speechRecognizer?.stopListening()
             speechRecognizer?.destroy()
@@ -139,12 +149,13 @@ class SOController(private val context: Context) {
 
             // Texto capturado que será enviado al ComunicadorController
             val mensajeCapturado = capturedText.toString().trim()
-            Log.d("SOController", "Texto capturado: $mensajeCapturado")
-            // Llamar a la función escuchar del ComunicadorController y enviarle el mensaje capturado
-            comunicadorController.escuchar(mensajeCapturado)
-
+            if (mensajeCapturado.isNotEmpty()) {
+                comunicadorController.escuchar(mensajeCapturado)
+                Log.d("SOController", "Texto capturado al solatar boton: $mensajeCapturado")
+            } else {
+                Log.d("SOController", "No se capturó ningún texto")
+            }
             capturedText.clear() // Limpiar el buffer de texto para la próxima vez
-
         }
     }
 }

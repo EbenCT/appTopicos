@@ -7,6 +7,7 @@ import android.hardware.camera2.CameraDevice
 import android.hardware.camera2.CameraManager
 import android.speech.tts.TextToSpeech
 import android.util.Log
+import android.widget.Toast
 import java.util.Locale
 
 class ComunicadorController(private val context: Context) {
@@ -72,7 +73,8 @@ class ComunicadorController(private val context: Context) {
             cameraManager.openCamera(cameraId, object : CameraDevice.StateCallback() {
                 override fun onOpened(camera: CameraDevice) {
                     Log.d("ComunicadorController", "Cámara abierta correctamente")
-                    camera.close() // Cerrar la cámara si es necesario
+                    Toast.makeText(context, "Cámara activada", Toast.LENGTH_SHORT).show()
+                    //camera.close() // Cerrar la cámara si es necesario
                 }
 
                 override fun onDisconnected(camera: CameraDevice) {

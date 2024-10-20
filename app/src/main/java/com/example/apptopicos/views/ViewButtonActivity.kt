@@ -1,5 +1,6 @@
 package com.example.apptopicos.views
 
+import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -23,6 +24,7 @@ class ViewButtonActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         soController = SOController(this)
@@ -38,12 +40,13 @@ class ViewButtonActivity : AppCompatActivity() {
                     // Se presionó el botón
                     Log.d("MiApp", "Presionaste el botón")
                     soController.activarMicrofono()
-
                 }
                 MotionEvent.ACTION_UP -> {
                     // Se soltó el botón
                     Log.d("MiApp", "Dejaste de presionar el botón")
                     soController.desactivarMicrofono()
+
+                    button.performClick()
                 }
             }
             true
