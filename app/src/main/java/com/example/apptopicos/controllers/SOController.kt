@@ -24,6 +24,7 @@ class SOController(private val context: Context) {
     private var buttonReleased: Boolean = false // Para rastrear si el botón sigue presionado
     private var registerController: RegisterController = RegisterController(context)
     private var comunicadorController: ComunicadorController = ComunicadorController(context)
+    private var cameraDevice: CameraDevice? = null
 
     // Mantener la cámara activa o apagarla
     fun isCameraActive(): Boolean {
@@ -77,6 +78,7 @@ class SOController(private val context: Context) {
         buttonReleased = false // Reiniciamos la bandera
         registerController.starRegister()
         registerController.logEvent("Micrófono activado")
+
 
         if (SpeechRecognizer.isRecognitionAvailable(context)) {
             speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context)
@@ -156,6 +158,38 @@ class SOController(private val context: Context) {
                 Log.d("SOController", "No se capturó ningún texto")
             }
             capturedText.clear() // Limpiar el buffer de texto para la próxima vez
+        }
+    }
+
+    fun activarCamara() {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            val cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+            try {
+                val cameraId = cameraManager.cameraIdList[0] // Usar la primera cámara disponible
+                cameraManager.openCamera(cameraId, object : CameraDevice.StateCallback() {
+                    override fun onOpened(camera: CameraDevice) {
+                        cameraDevice = camera
+                        isCameraInUse = true
+                        Log.d("SOController", "Cámara activada correctamente.")
+                    }
+
+                    override fun onDisconnected(camera: CameraDevice) {
+                        cameraDevice?.close()
+                        isCameraInUse = false
+                        Log.d("SOController", "Cámara desconectada.")
+                    }
+
+                    override fun onError(camera: CameraDevice, error: Int) {
+                        Log.e("SOController", "Error al activar la cámara: $error")
+                        isCameraInUse = false
+                    }
+                }, null)
+            } catch (e: CameraAccessException) {
+                Log.e("SOController", "Error al acceder a la cámara: ${e.message}")
+            }
+        } else {
+            Log.e("SOController", "Permiso de cámara no concedido")
+            // Aquí puedes manejar la solicitud de permisos si aún no se han concedido
         }
     }
 }
