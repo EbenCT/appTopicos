@@ -64,7 +64,7 @@ class SOController(private val context: Context) {
     }
 
     // Método para desactivar la cámara si está activa
-    fun disableCameraIfActive() {
+    fun camaraOff() {
         if (isCameraActive()) {
             Log.d("SOController", "Desactivando la cámara...")
         } else {

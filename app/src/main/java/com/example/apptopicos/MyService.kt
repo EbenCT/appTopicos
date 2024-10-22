@@ -149,7 +149,7 @@ class MyService : Service() {
         val intent = Intent("com.example.apptopicos.CLOSE_ACTIVITY")
         sendBroadcast(intent)
         //Apagar camara si es que esta activa
-        soController.disableCameraIfActive()
+        soController.camaraOff()
         // Apagar el registro y la auto-desactivación
         registerController.offRegister()
         autodesactivityController.offAutodesactivity()
