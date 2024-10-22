@@ -36,6 +36,13 @@ android {
     buildFeatures {
         viewBinding = true
     }
+
+    packaging {
+        resources {
+            excludes += "/META-INF/INDEX.LIST"
+            excludes += "/META-INF/DEPENDENCIES"
+        }
+    }
 }
 
 dependencies {
@@ -52,4 +59,20 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+
+    implementation("com.google.cloud:google-cloud-dialogflow:2.0.0")
+    implementation("com.google.api-client:google-api-client-android:1.32.1")
+    implementation("com.google.auth:google-auth-library-oauth2-http:1.1.0")
+
+    // gRPC OkHttp transport (que ya tienes)
+    implementation("io.grpc:grpc-okhttp:1.32.2")
+    // gRPC core
+    implementation("io.grpc:grpc-core:1.32.2")
+    // gRPC stub (necesario para manejar las llamadas a gRPC)
+    implementation("io.grpc:grpc-stub:1.32.2")
+    // Protobuf (necesario para las clases de diálogo y respuestas de Dialogflow)
+    implementation("com.google.protobuf:protobuf-java:3.21.12")
+    // gRPC Context
+    implementation("io.grpc:grpc-context:1.32.2")
+
 }

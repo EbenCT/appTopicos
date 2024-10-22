@@ -9,10 +9,15 @@ import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.widget.Toast
 import java.util.Locale
+import com.example.apptopicos.controllers.DialogflowController
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class ComunicadorController(private val context: Context) {
 
     private var textToSpeech: TextToSpeech? = null
+    private lateinit var dialogflowController: DialogflowController
 
     init {
         // Inicializar TextToSpeech para que el dispositivo pueda "hablar"
@@ -24,6 +29,9 @@ class ComunicadorController(private val context: Context) {
                 Log.e("ComunicadorController", "Error al inicializar TextToSpeech")
             }
         }
+
+        // Inicializar DialogflowController
+        dialogflowController = DialogflowController(context)
     }
 
     // Función para "escuchar" lo que el usuario diga
@@ -34,26 +42,17 @@ class ComunicadorController(private val context: Context) {
 
     // Función para "responder" con base en el mensaje escuchado
     private fun responder(mensaje: String) {
-        when {
-            mensaje.contains("hola", ignoreCase = true) || mensaje.contains("comenzar", ignoreCase = true) -> {
-                hablar("Bienvenido al detector de billetes")
-            }
-            mensaje.contains("chau", ignoreCase = true) || mensaje.contains("fin", ignoreCase = true) || mensaje.contains("adiós", ignoreCase = true) -> {
-                hablar("Adiós")
-                desactivar_escucha()
-            }
-            mensaje.contains("cámara", ignoreCase = true) -> {
-                activarCamara()
-                hablar("Activando cámara")
-            }
-            else -> {
-                hablar("No entiendo el comando")
-            }
+        // Ejecutar dentro de una corutina
+        Log.d("ComunicadorController", "Respondiendo: $mensaje")
+        CoroutineScope(Dispatchers.Main).launch {
+            val respuesta = dialogflowController.sendMessageToDialogflow(mensaje)
+            // Maneja la respuesta después de la llamada
+            hablar(respuesta);
         }
     }
 
     // Función para que el dispositivo "hable"
-    private fun hablar(texto: String) {
+    private fun hablar(texto: String?) {
         textToSpeech?.speak(texto, TextToSpeech.QUEUE_FLUSH, null, null)
         Log.d("ComunicadorController", "Respondiendo: $texto")
     }
