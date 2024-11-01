@@ -3,8 +3,7 @@ package com.example.apptopicos.controllers
 import android.content.Context
 import android.content.Intent
 
-class ComandController (private val soController: SOController,
-                        private val context: Context,){
+class ComandController (private val context: Context,){
     fun comando(mensaje: String){
         when {
             mensaje.contains("hola", ignoreCase = true) || mensaje.contains("comenzar", ignoreCase = true) -> {
@@ -15,7 +14,7 @@ class ComandController (private val soController: SOController,
                 context.sendBroadcast(intent)
             }
             mensaje.contains("cámara", ignoreCase = true) -> {
-                soController.activarCamara()
+                //soController.activarCamara()
             }
             else -> {
 
