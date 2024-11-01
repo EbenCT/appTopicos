@@ -77,15 +77,12 @@ class MyService : Service() {
             Modo = !Modo  // Cambiamos el estado de la variable Modo
             Log.d("MiApp", "Modo cambiado a: $Modo") // Log para indicar el cambio de modo
 
-            if (currentVolume > previousVolume) {
-                Log.d("MiApp", "Subir volumen detectado") // Log para subir volumen
-            } else if (currentVolume < previousVolume) {
-                Log.d("MiApp", "Bajar volumen detectado") // Log para bajar volumen
-            }
+            Log.d("MiApp","Se detecto pulsacion o cambio de volumen")
+            registerController.logEvent("Se detecto pulsacion")
+
+            verificar_swich()
         }
         previousVolume = currentVolume
-        registerController.logEvent("Se detecto pulsacion")
-        verificar_swich()
     }
 
     private fun verificar_swich() {

@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 class ComunicadorController(private val context: Context) {
 
     private var textToSpeech: TextToSpeech? = null
-    private lateinit var dialogflowController: DialogflowController
+    private var dialogflowController: DialogflowController
 
     init {
         // Inicializar TextToSpeech para que el dispositivo pueda "hablar"
