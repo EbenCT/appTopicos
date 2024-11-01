@@ -18,6 +18,7 @@ class ComunicadorController(private val context: Context) {
 
     private var textToSpeech: TextToSpeech? = null
     private var dialogflowController: DialogflowController
+    private val comandController: ComandController = ComandController(context)
 
     init {
         // Inicializar TextToSpeech para que el dispositivo pueda "hablar"
@@ -47,7 +48,8 @@ class ComunicadorController(private val context: Context) {
         CoroutineScope(Dispatchers.Main).launch {
             val respuesta = dialogflowController.sendMessageToDialogflow(mensaje)
             // Maneja la respuesta después de la llamada
-            hablar(respuesta);
+            hablar(respuesta)
+            comandController.ejecutarComando(respuesta.toString())
         }
     }
 
