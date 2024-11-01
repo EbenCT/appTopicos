@@ -1,6 +1,7 @@
 package com.example.apptopicos.controllers
 
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 
 class ComandController(private val context: Context) {
@@ -8,9 +9,9 @@ class ComandController(private val context: Context) {
     // Método que recibe la respuesta de Dialogflow y ejecuta el comando correspondiente
     fun ejecutarComando(respuesta: String) {
         when {
-            respuesta.contains("activar cámara", ignoreCase = true) -> activarCamara()
-            respuesta.contains("desactivar escucha", ignoreCase = true) -> desactivarEscucha()
-            respuesta.contains("otra acción específica", ignoreCase = true) -> otraAccion()
+            respuesta.contains("activare la camara", ignoreCase = true) -> activarCamara()
+            respuesta.contains("Hasta pronto", ignoreCase = true) -> desactivarEscucha()
+            respuesta.contains("Analizando", ignoreCase = true) -> otraAccion()
             else -> Log.d("CommandController", "Comando no reconocido: $respuesta")
         }
     }
@@ -22,7 +23,9 @@ class ComandController(private val context: Context) {
 
     private fun desactivarEscucha() {
         Log.d("CommandController", "Ejecutando: Desactivar escucha")
-        // Aquí puedes agregar el código para desactivar la escucha
+        // Enviar broadcast para desactivar escucha
+        val intent = Intent("com.example.apptopicos.DESACTIVAR_ESCUCHA")
+        context.sendBroadcast(intent)
     }
 
     private fun otraAccion() {
