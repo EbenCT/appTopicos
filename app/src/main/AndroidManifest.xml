@@ -31,8 +31,11 @@
         tools:targetApi="31">
         <activity
             android:name=".views.ViewButtonActivity"
-            android:exported="false"
-            android:label="@string/title_activity_view_button" />
+            android:exported="false" />
+        <activity
+            android:name=".views.CameraPreviewActivity"
+            android:theme="@style/Theme.AppCompat.Light.Dialog">
+        </activity>
 
         <receiver
             android:name=".MyReceiver"

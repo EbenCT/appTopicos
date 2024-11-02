@@ -4,9 +4,11 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 
+import com.example.apptopicos.views.CameraPreviewActivity
+
+
 class ComandController(private val context: Context) {
 
-    // Método que recibe la respuesta de Dialogflow y ejecuta el comando correspondiente
     fun ejecutarComando(respuesta: String) {
         when {
             respuesta.contains("activare la camara", ignoreCase = true) -> activarCamara()
@@ -18,7 +20,11 @@ class ComandController(private val context: Context) {
 
     private fun activarCamara() {
         Log.d("CommandController", "Ejecutando: Activar cámara")
-        // Aquí puedes agregar el código para activar la cámara si es necesario
+
+        val intent = Intent(context, CameraPreviewActivity::class.java)
+        Log.d("CommandController", "creada la intencion, inicando desde un contexto")
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) // Para iniciar desde un contexto de aplicación
+        context.startActivity(intent)
     }
 
     private fun desactivarEscucha() {
