@@ -54,7 +54,10 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.5")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.5")
     implementation("androidx.navigation:navigation-fragment-ktx:2.8.0")
-    implementation("androidx.navigation:navigation-ui-ktx:2.8.0") // Google API Extensions
+    implementation("androidx.navigation:navigation-ui-ktx:2.8.0")
+    implementation("androidx.camera:camera-core:1.4.0")
+    implementation("androidx.camera:camera-lifecycle:1.4.0")
+    implementation("androidx.camera:camera-view:1.4.0") // Google API Extensions
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
@@ -75,4 +78,7 @@ dependencies {
     // gRPC Context
     implementation("io.grpc:grpc-context:1.32.2")
 
+    implementation ("androidx.camera:camera-camera2:1.1.0") // Implementación necesaria de CameraX
+    implementation ("androidx.camera:camera-lifecycle:1.1.0")
+    implementation ("androidx.camera:camera-view:1.0.0-alpha31")
 }

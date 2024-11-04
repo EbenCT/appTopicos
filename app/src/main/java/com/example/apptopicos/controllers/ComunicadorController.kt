@@ -9,6 +9,7 @@ import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.widget.Toast
 import java.util.Locale
+import com.example.apptopicos.controllers.DialogflowController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -17,7 +18,7 @@ class ComunicadorController(private val context: Context) {
 
     private var textToSpeech: TextToSpeech? = null
     private var dialogflowController: DialogflowController
-    private var comandController: ComandController
+    private val comandController: ComandController = ComandController(context)
 
     init {
         // Inicializar TextToSpeech para que el dispositivo pueda "hablar"
@@ -32,7 +33,6 @@ class ComunicadorController(private val context: Context) {
 
         // Inicializar DialogflowController
         dialogflowController = DialogflowController(context)
-        comandController = ComandController(context)
     }
 
     // Función para "escuchar" lo que el usuario diga
@@ -49,7 +49,7 @@ class ComunicadorController(private val context: Context) {
             val respuesta = dialogflowController.sendMessageToDialogflow(mensaje)
             // Maneja la respuesta después de la llamada
             hablar(respuesta)
-            comandController.comando(respuesta.toString())
+            comandController.ejecutarComando(respuesta.toString())
         }
     }
 
