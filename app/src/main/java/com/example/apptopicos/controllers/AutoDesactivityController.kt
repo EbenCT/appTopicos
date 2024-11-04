@@ -28,16 +28,16 @@ class AutoDesactivityController(
         if (isActive) {
             isActive = false
             Log.d("MiApp", "Actividad automática detenida")
-            handler.removeCallbacks(inactivityCheckRunnable)
+            handler.removeCallbacks(Calcular_inactividad)
         }
     }
 
     private fun startInactivityCheck() {
-        handler.removeCallbacks(inactivityCheckRunnable) // Elimina cualquier chequeo anterior
-        handler.postDelayed(inactivityCheckRunnable, checkInterval) // Inicia el chequeo
+        handler.removeCallbacks(Calcular_inactividad) // Elimina cualquier chequeo anterior
+        handler.postDelayed(Calcular_inactividad, checkInterval) // Inicia el chequeo
     }
 
-    private val inactivityCheckRunnable = object : Runnable {
+    private val Calcular_inactividad = object : Runnable {
         override fun run() {
             if (isActive) {
                 val lastEvent = registerController.getLastEvent()
@@ -70,8 +70,8 @@ class AutoDesactivityController(
     // Método llamado desde RegisterController para reiniciar el chequeo de inactividad
     fun resetInactivityCheck() {
         if (isActive) {
-            handler.removeCallbacks(inactivityCheckRunnable) // Asegúrate de eliminar el anterior
-            handler.postDelayed(inactivityCheckRunnable, checkInterval) // Inicia un nuevo chequeo
+            handler.removeCallbacks(Calcular_inactividad) // Asegúrate de eliminar el anterior
+            handler.postDelayed(Calcular_inactividad, checkInterval) // Inicia un nuevo chequeo
             Log.d("MiApp", "Chequeo de inactividad reiniciado.")
         }
     }
