@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
+import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -21,28 +22,40 @@ import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.asRequestBody
+import org.json.JSONObject
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-class CameraPreviewActivity : AppCompatActivity() {
+class CameraPreviewActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
     private lateinit var cameraPreviewView: PreviewView
     private lateinit var imageCapture: ImageCapture
     private lateinit var cameraExecutor: ExecutorService
     private val REQUEST_CODE_PERMISSIONS = 10
     private var savedUri: Uri? = null
+    private lateinit var textToSpeech: TextToSpeech
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.camera_preview_layout)
         cameraPreviewView = findViewById(R.id.camera_preview)
+        textToSpeech = TextToSpeech(this, this)
 
         Log.d("CameraPreviewActivity", "Iniciando verificación de permisos de cámara")
         checkCameraPermission()
         cameraExecutor = Executors.newSingleThreadExecutor()
+    }
+
+    // Método de inicialización de TextToSpeech
+    override fun onInit(status: Int) {
+        if (status == TextToSpeech.SUCCESS) {
+            textToSpeech?.language = Locale.getDefault()
+        } else {
+            Log.e("CameraPreviewActivity", "Error al inicializar TextToSpeech")
+        }
     }
 
     private fun checkCameraPermission() {
@@ -94,7 +107,7 @@ class CameraPreviewActivity : AppCompatActivity() {
                 Log.d("CameraPreviewActivity", "Cámara iniciada, configurando captura de imagen tras 5 segundos")
                 Handler(Looper.getMainLooper()).postDelayed({
                     takePhoto()
-                }, 5000)
+                }, 8000)
 
             } catch (exc: Exception) {
                 Log.e("CameraPreviewActivity", "Error al inicializar la cámara", exc)
@@ -123,7 +136,7 @@ class CameraPreviewActivity : AppCompatActivity() {
                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
                     savedUri = outputFileResults.savedUri
                     Log.d("CameraPreviewActivity", "Imagen guardada en galería: $savedUri")
-
+                    textToSpeech.speak("Imagen capturada. Analizando", TextToSpeech.QUEUE_FLUSH, null, null)
                     Toast.makeText(baseContext, "Imagen guardada en galería", Toast.LENGTH_SHORT).show()
 
                     // Inicia la carga de la imagen en un hilo de fondo
@@ -182,7 +195,31 @@ class CameraPreviewActivity : AppCompatActivity() {
         try {
             client.newCall(request).execute().use { response ->
                 if (response.isSuccessful) {
-                    Log.d("CameraPreviewActivity", "Imagen subida exitosamente: ${response.message}")
+                    // Parsear el cuerpo de la respuesta JSON
+                    response.body?.string()?.let { responseBody ->
+                        Log.d("CameraPreviewActivity", "Respuesta del servidor: $responseBody")
+                        // Convertir el JSON a un objeto para acceder a los datos
+                        val jsonResponse = JSONObject(responseBody)
+                        val predictedClass = jsonResponse.getString("predicted_class")
+                        val confidence = jsonResponse.getDouble("confidence")
+
+                        // Formatea la confianza para que solo incluya la parte entera como porcentaje
+                        val confidencePercentage = confidence.toInt()
+                        val message = "Se detectó que el billete es de $predictedClass pesos con una confianza de $confidencePercentage%"
+
+                        // Mostrar los resultados en consola o en un Toast
+                        Log.d("CameraPreviewActivity", "Clase Predicha: $predictedClass, Confianza: $confidence")
+                        runOnUiThread {
+                            Toast.makeText(
+                                this@CameraPreviewActivity,
+                                "Clase Predicha: $predictedClass\nConfianza: $confidencePercentage",
+                                Toast.LENGTH_LONG
+                            ).show()
+                            // Reproduce el mensaje con TextToSpeech
+                            Log.d("CameraPreviewActivity", "Reproducionedo el mensaje: $message")
+                            textToSpeech.speak(message, TextToSpeech.QUEUE_FLUSH, null, null)
+                        }
+                    }
                 } else {
                     Log.e("CameraPreviewActivity", "Error al subir la imagen: ${response.message}")
                 }
@@ -192,9 +229,16 @@ class CameraPreviewActivity : AppCompatActivity() {
         }
     }
 
+
     override fun onDestroy() {
         super.onDestroy()
         Log.d("CameraPreviewActivity", "Liberando recursos en onDestroy")
         cameraExecutor.shutdown()
+
+        // Libera TextToSpeech al destruir la actividad
+        if (this::textToSpeech.isInitialized) {
+            textToSpeech.stop()
+            textToSpeech.shutdown()
+        }
     }
 }
