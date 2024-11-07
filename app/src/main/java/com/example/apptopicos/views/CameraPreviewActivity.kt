@@ -37,6 +37,7 @@ class CameraPreviewActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     private val REQUEST_CODE_PERMISSIONS = 10
     private var savedUri: Uri? = null
     private lateinit var textToSpeech: TextToSpeech
+    private var retryCounter = 1  // Contador de intentos
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,10 +50,9 @@ class CameraPreviewActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         cameraExecutor = Executors.newSingleThreadExecutor()
     }
 
-    // Método de inicialización de TextToSpeech
     override fun onInit(status: Int) {
         if (status == TextToSpeech.SUCCESS) {
-            textToSpeech?.language = Locale.getDefault()
+            textToSpeech.language = Locale.getDefault()
         } else {
             Log.e("CameraPreviewActivity", "Error al inicializar TextToSpeech")
         }
@@ -105,14 +105,18 @@ class CameraPreviewActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
                 cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture)
 
                 Log.d("CameraPreviewActivity", "Cámara iniciada, configurando captura de imagen tras 5 segundos")
-                Handler(Looper.getMainLooper()).postDelayed({
-                    takePhoto()
-                }, 8000)
+                iniciarCicloCaptura()
 
             } catch (exc: Exception) {
                 Log.e("CameraPreviewActivity", "Error al inicializar la cámara", exc)
             }
         }, ContextCompat.getMainExecutor(this))
+    }
+
+    private fun iniciarCicloCaptura() {
+        Handler(Looper.getMainLooper()).postDelayed({
+            takePhoto()
+        }, 8000) // Espera 8 segundos antes de capturar la imagen
     }
 
     private fun takePhoto() {
@@ -139,7 +143,6 @@ class CameraPreviewActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
                     textToSpeech.speak("Imagen capturada. Analizando", TextToSpeech.QUEUE_FLUSH, null, null)
                     Toast.makeText(baseContext, "Imagen guardada en galería", Toast.LENGTH_SHORT).show()
 
-                    // Inicia la carga de la imagen en un hilo de fondo
                     cameraExecutor.execute {
                         savedUri?.let { uri ->
                             val imageFile = uriToFile(uri)
@@ -158,21 +161,6 @@ class CameraPreviewActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
                 }
             }
         )
-    }
-
-    private fun uriToFile(uri: Uri): File? {
-        return try {
-            val filePathColumn = arrayOf(MediaStore.Images.Media.DATA)
-            val cursor = contentResolver.query(uri, filePathColumn, null, null, null)
-            cursor?.moveToFirst()
-            val columnIndex = cursor?.getColumnIndex(filePathColumn[0])
-            val filePath = columnIndex?.let { cursor.getString(it) }
-            cursor?.close()
-            filePath?.let { File(it) }
-        } catch (e: Exception) {
-            Log.e("CameraPreviewActivity", "Error al convertir URI a archivo", e)
-            null
-        }
     }
 
     private fun uploadImage(imageFile: File) {
@@ -195,30 +183,12 @@ class CameraPreviewActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         try {
             client.newCall(request).execute().use { response ->
                 if (response.isSuccessful) {
-                    // Parsear el cuerpo de la respuesta JSON
                     response.body?.string()?.let { responseBody ->
-                        Log.d("CameraPreviewActivity", "Respuesta del servidor: $responseBody")
-                        // Convertir el JSON a un objeto para acceder a los datos
                         val jsonResponse = JSONObject(responseBody)
                         val predictedClass = jsonResponse.getString("predicted_class")
                         val confidence = jsonResponse.getDouble("confidence")
 
-                        // Formatea la confianza para que solo incluya la parte entera como porcentaje
-                        val confidencePercentage = confidence.toInt()
-                        val message = "Se detectó que el billete es de $predictedClass pesos con una confianza de $confidencePercentage%"
-
-                        // Mostrar los resultados en consola o en un Toast
-                        Log.d("CameraPreviewActivity", "Clase Predicha: $predictedClass, Confianza: $confidence")
-                        runOnUiThread {
-                            Toast.makeText(
-                                this@CameraPreviewActivity,
-                                "Clase Predicha: $predictedClass\nConfianza: $confidencePercentage",
-                                Toast.LENGTH_LONG
-                            ).show()
-                            // Reproduce el mensaje con TextToSpeech
-                            Log.d("CameraPreviewActivity", "Reproducionedo el mensaje: $message")
-                            textToSpeech.speak(message, TextToSpeech.QUEUE_FLUSH, null, null)
-                        }
+                        procesarResultado(predictedClass, confidence)
                     }
                 } else {
                     Log.e("CameraPreviewActivity", "Error al subir la imagen: ${response.message}")
@@ -229,16 +199,57 @@ class CameraPreviewActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         }
     }
 
+    private fun procesarResultado(predictedClass: String, confidence: Double) {
+        if (confidence >= 70) {
+            val confidencePercentage = confidence.toInt()
+            val message = "Se detectó que el billete es de $predictedClass pesos con una confianza de $confidencePercentage%"
+            runOnUiThread {
+                Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+                textToSpeech.speak(message, TextToSpeech.QUEUE_FLUSH, null, null)
+            }
+            Handler(Looper.getMainLooper()).postDelayed({
+                finish()  // Cierra la actividad
+            }, 7000)
+        } else {
+            retryCounter++
+            if (retryCounter > 3) {
+                val message = "Se rebaso el límite de intentos, vuelve a intentarlo más tarde"
+                runOnUiThread {
+                    Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+                    textToSpeech.speak(message, TextToSpeech.QUEUE_FLUSH, null, null)
+                }
+                Handler(Looper.getMainLooper()).postDelayed({
+                    finish()  // Cierra la actividad tras el mensaje
+                }, 8000)
+            } else {
+                val message = "No se reconoció billete. Vuelva a intentarlo."
+                runOnUiThread {
+                    Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+                    textToSpeech.speak(message, TextToSpeech.QUEUE_FLUSH, null, null)
+                }
+                iniciarCicloCaptura()  // Reinicia el ciclo de captura
+            }
+        }
+    }
+
+    private fun uriToFile(uri: Uri): File? {
+        return try {
+            val filePathColumn = arrayOf(MediaStore.Images.Media.DATA)
+            val cursor = contentResolver.query(uri, filePathColumn, null, null, null)
+            cursor?.moveToFirst()
+            val columnIndex = cursor?.getColumnIndex(filePathColumn[0])
+            val filePath = columnIndex?.let { cursor.getString(it) }
+            cursor?.close()
+            filePath?.let { File(it) }
+        } catch (e: Exception) {
+            Log.e("CameraPreviewActivity", "Error al convertir URI a archivo", e)
+            null
+        }
+    }
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.d("CameraPreviewActivity", "Liberando recursos en onDestroy")
         cameraExecutor.shutdown()
-
-        // Libera TextToSpeech al destruir la actividad
-        if (this::textToSpeech.isInitialized) {
-            textToSpeech.stop()
-            textToSpeech.shutdown()
-        }
+        textToSpeech.shutdown()
     }
 }
