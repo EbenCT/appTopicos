@@ -9,13 +9,19 @@ import com.example.apptopicos.views.CameraPreviewActivity
 
 class ComandController(private val context: Context) {
 
+    private val resultadoController = ResultadosController(context)
     fun ejecutarComando(respuesta: String) {
         when {
             respuesta.contains("activare la camara", ignoreCase = true) -> activarCamara()
             respuesta.contains("Hasta pronto", ignoreCase = true) -> desactivarEscucha()
             respuesta.contains("Analizando", ignoreCase = true) -> otraAccion()
+            respuesta.contains("Revisaré los registros", ignoreCase = true) -> comunicarRegistros()
             else -> Log.d("CommandController", "Comando no reconocido: $respuesta")
         }
+    }
+
+    private fun comunicarRegistros() {
+        resultadoController.getRegistro()
     }
 
     private fun activarCamara() {

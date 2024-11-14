@@ -190,7 +190,7 @@ class CameraPreviewActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             .build()
 
         val request = Request.Builder()
-            .url("http://192.168.0.5:5000/upload_image") // Cambia la IP a la de tu servidor
+            .url("http://192.168.188.243:5000/upload_image") // Cambia la IP a la de tu servidor
             .post(requestBody)
             .build()
 
@@ -210,9 +210,17 @@ class CameraPreviewActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             }
         } catch (e: Exception) {
             Log.e("CameraPreviewActivity", "Error al realizar la solicitud de carga de imagen", e)
+            runOnUiThread {
+                textToSpeech.speak("No se pudo establecer conexión", TextToSpeech.QUEUE_FLUSH, null, null)
+                Toast.makeText(this, "No se pudo establecer conexión", Toast.LENGTH_LONG).show()
+
+            }
+            // Esperar un breve momento para que se reproduzca el mensaje antes de cerrar
+            Handler(Looper.getMainLooper()).postDelayed({
+                finish()  // Cierra la actividad tras el mensaje
+            }, 3000)
         }
     }
-
     private fun procesarResultado(predictedClass: String, confidence: Double) {
         if (confidence >= 70) {
             val confidencePercentage = confidence.toInt()
