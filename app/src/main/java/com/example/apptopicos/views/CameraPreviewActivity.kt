@@ -1,6 +1,10 @@
 package com.example.apptopicos.views
 
+import android.content.BroadcastReceiver
 import android.content.ContentValues
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
@@ -17,6 +21,7 @@ import androidx.camera.view.PreviewView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.apptopicos.R
+import com.example.apptopicos.controllers.ResultadosController
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
@@ -31,6 +36,7 @@ import java.util.concurrent.Executors
 
 class CameraPreviewActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
+    private lateinit var resultadoController: ResultadosController
     private lateinit var cameraPreviewView: PreviewView
     private lateinit var imageCapture: ImageCapture
     private lateinit var cameraExecutor: ExecutorService
@@ -39,11 +45,19 @@ class CameraPreviewActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     private lateinit var textToSpeech: TextToSpeech
     private var retryCounter = 1  // Contador de intentos
 
+    private val closeCameraReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            finish()  // Cierra el CameraPreviewActivity
+        }
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.camera_preview_layout)
         cameraPreviewView = findViewById(R.id.camera_preview)
         textToSpeech = TextToSpeech(this, this)
+        resultadoController = ResultadosController(this)
+        // Registrar el receptor de broadcast para cerrar el CameraPreviewActivity
+        registerReceiver(closeCameraReceiver, IntentFilter("com.example.apptopicos.CLOSE_CAMERA_ACTIVITY"))
 
         Log.d("CameraPreviewActivity", "Iniciando verificación de permisos de cámara")
         checkCameraPermission()
@@ -176,7 +190,7 @@ class CameraPreviewActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             .build()
 
         val request = Request.Builder()
-            .url("http://192.168.0.5:5000/upload_image") // Cambia la IP a la de tu servidor
+            .url("http://192.168.188.243:5000/upload_image") // Cambia la IP a la de tu servidor
             .post(requestBody)
             .build()
 
@@ -196,20 +210,29 @@ class CameraPreviewActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             }
         } catch (e: Exception) {
             Log.e("CameraPreviewActivity", "Error al realizar la solicitud de carga de imagen", e)
+            runOnUiThread {
+                textToSpeech.speak("No se pudo establecer conexión", TextToSpeech.QUEUE_FLUSH, null, null)
+                Toast.makeText(this, "No se pudo establecer conexión", Toast.LENGTH_LONG).show()
+
+            }
+            // Esperar un breve momento para que se reproduzca el mensaje antes de cerrar
+            Handler(Looper.getMainLooper()).postDelayed({
+                finish()  // Cierra la actividad tras el mensaje
+            }, 3000)
         }
     }
-
     private fun procesarResultado(predictedClass: String, confidence: Double) {
         if (confidence >= 70) {
             val confidencePercentage = confidence.toInt()
             val message = "Se detectó que el billete es de $predictedClass pesos con una confianza de $confidencePercentage%"
+            resultadoController.registrarResultado(predictedClass, confidencePercentage)
             runOnUiThread {
                 Toast.makeText(this, message, Toast.LENGTH_LONG).show()
                 textToSpeech.speak(message, TextToSpeech.QUEUE_FLUSH, null, null)
             }
             Handler(Looper.getMainLooper()).postDelayed({
                 finish()  // Cierra la actividad
-            }, 7000)
+            }, 6000)
         } else {
             retryCounter++
             if (retryCounter > 3) {
@@ -218,6 +241,8 @@ class CameraPreviewActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
                     Toast.makeText(this, message, Toast.LENGTH_LONG).show()
                     textToSpeech.speak(message, TextToSpeech.QUEUE_FLUSH, null, null)
                 }
+                val intent = Intent("com.example.apptopicos.DESACTIVAR_ESCUCHA")
+                sendBroadcast(intent)
                 Handler(Looper.getMainLooper()).postDelayed({
                     finish()  // Cierra la actividad tras el mensaje
                 }, 8000)
@@ -249,6 +274,7 @@ class CameraPreviewActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
     override fun onDestroy() {
         super.onDestroy()
+        unregisterReceiver(closeCameraReceiver)
         cameraExecutor.shutdown()
         textToSpeech.shutdown()
     }

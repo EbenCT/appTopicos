@@ -145,6 +145,9 @@ class MyService : Service() {
         // Enviar broadcast para cerrar el Activity
         val intent = Intent("com.example.apptopicos.CLOSE_ACTIVITY")
         sendBroadcast(intent)
+        // Enviar broadcast para cerrar el CameraPreviewActivity
+        val intentCloseCameraActivity = Intent("com.example.apptopicos.CLOSE_CAMERA_ACTIVITY")
+        sendBroadcast(intentCloseCameraActivity)
         //Apagar camara si es que esta activa
         soController.camaraOff()
         // Apagar el registro y la auto-desactivación

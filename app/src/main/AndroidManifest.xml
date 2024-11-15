@@ -35,7 +35,8 @@
             android:exported="false" />
         <activity
             android:name=".views.CameraPreviewActivity"
-            android:theme="@style/Theme.AppCompat.Light.Dialog">
+            android:theme="@style/Theme.AppCompat.Light.Dialog"
+            android:launchMode="singleTask">
         </activity>
 
         <receiver

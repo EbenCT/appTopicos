@@ -14,7 +14,7 @@ class AutoDesactivityController(
     private var isActive: Boolean = false
     private val handler = Handler(Looper.getMainLooper())
     private val checkInterval: Long = 5000 // Verifica cada 5 segundos
-    private val inactivityThreshold: Long = 30000 // 30 segundos de inactividad
+    private val inactivityThreshold: Long = 60000 // 30 segundos de inactividad
 
     fun starAutodesactivity() {
         if (!isActive) {
