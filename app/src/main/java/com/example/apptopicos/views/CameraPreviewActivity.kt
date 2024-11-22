@@ -188,9 +188,9 @@ class CameraPreviewActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
                 imageFile.asRequestBody("image/jpeg".toMediaTypeOrNull())
             )
             .build()
-
+        val url = getString(R.string.IP_CONNECTION)
         val request = Request.Builder()
-            .url("http://192.168.188.243:5000/upload_image") // Cambia la IP a la de tu servidor
+            .url(url) // Cambia la IP a la de tu servidor
             .post(requestBody)
             .build()
 

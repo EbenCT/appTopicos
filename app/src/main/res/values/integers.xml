@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--CANTIDAD EN MILISEGUNDOS PARA EL AUTODESACTIVADO-->
+    <integer name="TIEMPO_DE_VERIFICACION">5000</integer>
+    <integer name="TIEMPO_DE_INACTIVIDAD">60000</integer>
+</resources>

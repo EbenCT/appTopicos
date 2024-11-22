@@ -3,6 +3,7 @@ package com.example.apptopicos.controllers
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import com.example.apptopicos.R
 
 import com.example.apptopicos.views.CameraPreviewActivity
 
@@ -12,12 +13,26 @@ class ComandController(private val context: Context) {
     private val resultadoController = ResultadosController(context)
     fun ejecutarComando(respuesta: String) {
         when {
-            respuesta.contains("activare la camara", ignoreCase = true) -> activarCamara()
-            respuesta.contains("Hasta pronto", ignoreCase = true) -> desactivarEscucha()
-            respuesta.contains("Analizando", ignoreCase = true) -> otraAccion()
-            respuesta.contains("Revisaré los registros", ignoreCase = true) -> comunicarRegistros()
+            respuesta.contains(context.getString(R.string.FRASE_START_CAMERA)   , ignoreCase = true) -> activarCamara()
+            respuesta.contains(context.getString(R.string.FRASE_DESACTIVAR)     , ignoreCase = true) -> desactivarEscucha()
+            respuesta.contains(context.getString(R.string.FRASE_REPIT_RESULT)   , ignoreCase = true) -> comunicarRegistros()
+            respuesta.contains(context.getString(R.string.FRASE_GPS)            , ignoreCase = true) -> solicitarUbicacion()
+            respuesta.contains(context.getString(R.string.FRASE_CALCULO)        , ignoreCase = true) -> realizarCalculo()
+            respuesta.contains(context.getString(R.string.FRASE_NAVEGACION)     , ignoreCase = true) -> iniciarNavegacion()
             else -> Log.d("CommandController", "Comando no reconocido: $respuesta")
         }
+    }
+
+    private fun iniciarNavegacion() {
+        TODO("Not yet implemented")
+    }
+
+    private fun realizarCalculo() {
+        TODO("Not yet implemented")
+    }
+
+    private fun solicitarUbicacion() {
+        TODO("Not yet implemented")
     }
 
     private fun comunicarRegistros() {
@@ -38,10 +53,5 @@ class ComandController(private val context: Context) {
         // Enviar broadcast para desactivar escucha
         val intent = Intent("com.example.apptopicos.DESACTIVAR_ESCUCHA")
         context.sendBroadcast(intent)
-    }
-
-    private fun otraAccion() {
-        Log.d("CommandController", "Ejecutando: Otra acción específica")
-        // Código para ejecutar una acción específica
     }
 }
