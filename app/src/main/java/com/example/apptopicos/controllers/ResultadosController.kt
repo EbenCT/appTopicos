@@ -11,6 +11,7 @@ class ResultadosController(private val context: Context) : TextToSpeech.OnInitLi
     private val fileName = "resultados_log.txt"
     private var textToSpeech: TextToSpeech
     private var isTTSInitialized = false
+    private var isSessionActive = false
 
     data class Resultado(val clase: String, val confianza: Int)
 
@@ -26,6 +27,13 @@ class ResultadosController(private val context: Context) : TextToSpeech.OnInitLi
 
     // Método para registrar un resultado
     fun registrarResultado(predictedClass: String, confidence: Int) {
+
+        // Si la sesión está activa y no se ha registrado aún ningún resultado, resetear archivo
+        if (!isSessionActive) {
+            resetResultados()
+            isSessionActive = true  // Marcar que ya se registró el primer resultado
+        }
+
         val resultado = Resultado(predictedClass, confidence)
         resultadosLog.add(resultado)
         Log.d("ResultadosController", "Resultado registrado: $predictedClass con confianza de $confidence")
@@ -95,5 +103,9 @@ class ResultadosController(private val context: Context) : TextToSpeech.OnInitLi
         if (isTTSInitialized) {
             textToSpeech.shutdown()
         }
+    }
+
+    fun iniciarNuevaSesion() {
+        isSessionActive = false  // Resetear el indicador de sesión
     }
 }

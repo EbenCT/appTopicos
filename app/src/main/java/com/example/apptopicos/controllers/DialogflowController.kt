@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 
 
 class DialogflowController(private val context: Context) {
-    private suspend fun getSession(): SessionsClient? {
+    private fun getSession(): SessionsClient? {
         val stream: InputStream = context.resources.openRawResource(R.raw.dialogflow_credentials)
         val credentials = GoogleCredentials.fromStream(stream)
         val settings = SessionsSettings.newBuilder()
@@ -48,7 +48,7 @@ class DialogflowController(private val context: Context) {
 
         return withContext(Dispatchers.IO) {
             val sessionClient = getSession() ?: return@withContext null
-            val session = SessionName.of("detector-de-billetes-vtnl", "1")  // Asegúrate de que estos valores sean correctos
+            val session = SessionName.of(context.getString(R.string.DIALOGFLOW_NAME_PROJECT), "1")  // Asegúrate de que estos valores sean correctos
             val queryInput = QueryInput.newBuilder().apply {
                 text = TextInput.newBuilder().setText(message).setLanguageCode("es-ES").build()
             }.build()

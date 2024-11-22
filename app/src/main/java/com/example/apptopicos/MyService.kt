@@ -18,6 +18,7 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.example.apptopicos.controllers.AutoDesactivityController
 import com.example.apptopicos.controllers.RegisterController
+import com.example.apptopicos.controllers.ResultadosController
 import com.example.apptopicos.controllers.SOController
 import com.example.apptopicos.views.ViewButtonActivity
 
@@ -29,11 +30,13 @@ class MyService : Service() {
     private lateinit var registerController: RegisterController
     private lateinit var autodesactivityController: AutoDesactivityController
     private lateinit var soController: SOController
+    private lateinit var resultadosController: ResultadosController
     override fun onCreate() {
         super.onCreate()
         registerController = RegisterController(this)
         autodesactivityController = AutoDesactivityController(this, registerController)
         soController = SOController(this)
+        resultadosController = ResultadosController(this)
         Log.d("MiApp", "Servicio creado") // Log para servicio creado
 
         val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
@@ -104,7 +107,7 @@ class MyService : Service() {
 
     private fun activar_escucha() {
         Log.d("MiApp", "Activando escucha...")
-
+        resultadosController.iniciarNuevaSesion()
         val intent = Intent(this, ViewButtonActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 

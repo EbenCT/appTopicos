@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import com.example.apptopicos.R
 
 class AutoDesactivityController(
     private val context: Context, // Agregar contexto como parámetro
@@ -13,8 +14,8 @@ class AutoDesactivityController(
 
     private var isActive: Boolean = false
     private val handler = Handler(Looper.getMainLooper())
-    private val checkInterval: Long = 5000 // Verifica cada 5 segundos
-    private val inactivityThreshold: Long = 60000 // 30 segundos de inactividad
+    private val checkInterval: Long = R.integer.TIEMPO_DE_VERIFICACION.toLong() // Verifica cada N segundos
+    private val inactivityThreshold: Long = R.integer.TIEMPO_DE_INACTIVIDAD.toLong() // N segundos de inactividad
 
     fun starAutodesactivity() {
         if (!isActive) {

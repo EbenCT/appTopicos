@@ -4,4 +4,18 @@
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
+
+    <!--FRASES CLAVE COMAND CONTROLLER-->
+    <string name="FRASE_START_CAMERA">activare la camara</string>
+    <string name="FRASE_DESACTIVAR">Hasta pronto</string>
+    <string name="FRASE_REPIT_RESULT">Revisaré los registros</string>
+    <string name="FRASE_GPS">Activando GPS</string>
+    <string name="FRASE_CALCULO">que deseas realizar</string>
+    <string name="FRASE_NAVEGACION">lugar deseas ir</string>
+
+    <!--CONEXION IP-->
+    <string name="IP_CONNECTION">http://192.168.80.243:5000/upload_image</string>
+
+    <!--CONEXION DIALOG FLOW-->
+    <string name="DIALOGFLOW_NAME_PROJECT">detector-de-billetes-vtnl</string>
 </resources>
