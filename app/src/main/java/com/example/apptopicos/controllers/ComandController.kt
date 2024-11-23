@@ -11,6 +11,7 @@ import com.example.apptopicos.views.CameraPreviewActivity
 class ComandController(private val context: Context) {
 
     private val resultadoController = ResultadosController(context)
+    private val gpsController = GPSController(context)
     fun ejecutarComando(respuesta: String) {
         when {
             respuesta.contains(context.getString(R.string.FRASE_START_CAMERA)   , ignoreCase = true) -> activarCamara()
@@ -32,7 +33,7 @@ class ComandController(private val context: Context) {
     }
 
     private fun solicitarUbicacion() {
-        TODO("Not yet implemented")
+        gpsController.obtenerUbicacion()
     }
 
     private fun comunicarRegistros() {

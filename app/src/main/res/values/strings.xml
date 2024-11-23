@@ -18,4 +18,6 @@
 
     <!--CONEXION DIALOG FLOW-->
     <string name="DIALOGFLOW_NAME_PROJECT">detector-de-billetes-vtnl</string>
+
+    <string name="google_maps_key" templateMergeStrategy="preserve">AIzaSyALnVdK51wX_xFlKx5lDxZHxkrr-wdm9Aw</string>
 </resources>
