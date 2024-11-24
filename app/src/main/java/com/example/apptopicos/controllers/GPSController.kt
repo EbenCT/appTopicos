@@ -45,12 +45,12 @@ class GPSController(private val context: Context) : TextToSpeech.OnInitListener 
                         comunicarPorVoz(mensaje)
                     } catch (e: Exception) {
                         e.printStackTrace()
-                        comunicarPorVoz("Ocurrió un error al obtener la ubicación.")
+                        comunicarPorVoz("Ocurrió un error al obtener la ubicación. Intente otra vez")
                     }
                 }
             } else {
                 GlobalScope.launch(Dispatchers.Main) {
-                    comunicarPorVoz("No se pudo obtener la ubicación.")
+                    comunicarPorVoz("No se pudo obtener la ubicación. Hay problemas de conexión, vualva a intentarlo")
                 }
             }
         }
@@ -63,5 +63,9 @@ class GPSController(private val context: Context) : TextToSpeech.OnInitListener 
     fun liberarRecursos() {
         textToSpeech?.stop()
         textToSpeech?.shutdown()
+    }
+
+    fun iniciarNavegacion(mensaje: String) {
+
     }
 }

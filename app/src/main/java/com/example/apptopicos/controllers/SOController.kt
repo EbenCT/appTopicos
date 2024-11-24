@@ -13,6 +13,7 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
 import androidx.core.content.ContextCompat
+import com.example.apptopicos.utils.GlobalVars
 import java.util.Locale
 
 class SOController(private val context: Context) {
@@ -24,7 +25,8 @@ class SOController(private val context: Context) {
     private var buttonReleased: Boolean = false // Para rastrear si el botón sigue presionado
     private var registerController: RegisterController = RegisterController(context)
     private var comunicadorController: ComunicadorController = ComunicadorController(context)
-
+    private var gptController: GPTController = GPTController(context) // Controlador para cálculos
+    private var gpsController: GPSController = GPSController(context) // Controlador para navegación
 
     // Mantener la cámara activa o apagarla
     private fun isCameraActive(): Boolean {
@@ -79,7 +81,6 @@ class SOController(private val context: Context) {
         registerController.starRegister()
         registerController.logEvent("Micrófono activado")
 
-
         if (SpeechRecognizer.isRecognitionAvailable(context)) {
             speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context)
             val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
@@ -101,7 +102,6 @@ class SOController(private val context: Context) {
 
                 override fun onEndOfSpeech() {
                     Log.d("SOController", "Fin de la conversación")
-                    // Aquí no apagamos el micrófono inmediatamente. Esperamos a que el reconocimiento termine.
                 }
 
                 override fun onError(error: Int) {
@@ -114,7 +114,7 @@ class SOController(private val context: Context) {
                     matches?.let {
                         capturedText.append(it[0]).append(" ") // Acumular el texto capturado
                     }
-                    Log.d("SOController", "Texto capturado sin soltar boton: ${capturedText.toString().trim()}")
+                    Log.d("SOController", "Texto capturado sin soltar botón: ${capturedText.toString().trim()}")
                     finalizarCapturaVoz()
                 }
 
@@ -132,11 +132,8 @@ class SOController(private val context: Context) {
     }
 
     fun desactivarMicrofono() {
-        // Marcamos que el botón ha sido soltado
         buttonReleased = true
         Log.d("SOController", "Botón soltado, esperando a que termine el reconocimiento de voz")
-
-        // Si ya terminó de capturar el texto, finalizamos la captura de voz
         if (!isListening) {
             finalizarCapturaVoz()
         }
@@ -149,11 +146,28 @@ class SOController(private val context: Context) {
             isListening = false
             Log.d("SOController", "Micrófono desactivado")
 
-            // Texto capturado que será enviado al ComunicadorController
+            // Texto capturado que será enviado a la acción correspondiente
             val mensajeCapturado = capturedText.toString().trim()
             if (mensajeCapturado.isNotEmpty()) {
-                comunicadorController.escuchar(mensajeCapturado)
-                Log.d("SOController", "Texto capturado al solatar boton: $mensajeCapturado")
+                when (GlobalVars.command) {
+                    0 -> {
+                        comunicadorController.escuchar(mensajeCapturado)
+                        Log.d("SOController", "Texto capturado al soltar botón (modo comunicador): $mensajeCapturado")
+                    }
+                    1 -> {
+                        gptController.enviarCalculo(mensajeCapturado)
+                        Log.d("SOController", "Texto enviado a GPTController para cálculo: $mensajeCapturado")
+                        GlobalVars.command=0
+                    }
+                    2 -> {
+                        gpsController.iniciarNavegacion(mensajeCapturado)
+                        Log.d("SOController", "Texto enviado a GPSController para navegación: $mensajeCapturado")
+                        GlobalVars.command=0
+                    }
+                    else -> {
+                        Log.e("SOController", "Comando desconocido: ${GlobalVars.command}")
+                    }
+                }
             } else {
                 Log.d("SOController", "No se capturó ningún texto")
             }

@@ -56,7 +56,8 @@
             android:name=".MyService"
             android:enabled="true"
             android:exported="true"
-            android:foregroundServiceType="camera|microphone" />
+            android:foregroundServiceType="camera|microphone"
+            android:launchMode="singleTask"/>
     </application>
 
 </manifest>
