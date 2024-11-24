@@ -83,6 +83,8 @@ dependencies {
     implementation ("androidx.camera:camera-view:1.0.0-alpha31")
 
     implementation ("com.squareup.okhttp3:okhttp:4.10.0")
+    implementation ("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation ("com.squareup.retrofit2:converter-gson:2.11.0")
 
     implementation ("com.google.android.gms:play-services-maps:19.0.0") // Reemplaza con la última versión
     implementation ("com.google.android.gms:play-services-location:19.0.0")

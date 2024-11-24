@@ -26,10 +26,10 @@ class GeocoderHelper(private val context: Context) {
             try {
                 val geocoder = Geocoder(context, Locale.getDefault())
                 val addresses = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    geocoder.getFromLocation(latitude, longitude, 10) ?: emptyList()
+                    geocoder.getFromLocation(latitude, longitude, 2) ?: emptyList()
                 } else {
                     @Suppress("DEPRECATION")
-                    geocoder.getFromLocation(latitude, longitude, 10) ?: emptyList()
+                    geocoder.getFromLocation(latitude, longitude, 2) ?: emptyList()
                 }
                 Log.d("GeocoderHelper", "Resultados obtenidos: $addresses")
                 if (addresses.isNotEmpty()) {
@@ -66,8 +66,8 @@ class GeocoderHelper(private val context: Context) {
                 it.street?.let { street -> append("en la calle o avenida $street.") }
                 it.feature?.let { feature -> append("punto de interés $feature.") }
             }.ifEmpty {
-                "No se pudo determinar la ubicación exacta."
+                "No se pudo determinar la ubicación exacta, por favor intente de nuevo."
             }
-        } ?: "No se pudo obtener información de la ubicación."
+        } ?: "No se pudo obtener información de la ubicación. Hay problemas con la coenxión, intente de nuevo"
     }
 }

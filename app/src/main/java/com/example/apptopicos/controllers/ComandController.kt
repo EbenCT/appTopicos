@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import com.example.apptopicos.R
+import com.example.apptopicos.utils.GlobalVars
 
 import com.example.apptopicos.views.CameraPreviewActivity
 
@@ -29,7 +30,7 @@ class ComandController(private val context: Context) {
     }
 
     private fun realizarCalculo() {
-        TODO("Not yet implemented")
+        GlobalVars.command=1
     }
 
     private fun solicitarUbicacion() {
