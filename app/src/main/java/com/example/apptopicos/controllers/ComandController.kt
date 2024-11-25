@@ -26,7 +26,7 @@ class ComandController(private val context: Context) {
     }
 
     private fun iniciarNavegacion() {
-        TODO("Not yet implemented")
+        GlobalVars.command=2
     }
 
     private fun realizarCalculo() {

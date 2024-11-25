@@ -86,10 +86,12 @@ dependencies {
     implementation ("com.squareup.retrofit2:retrofit:2.11.0")
     implementation ("com.squareup.retrofit2:converter-gson:2.11.0")
 
-    implementation ("com.google.android.gms:play-services-maps:19.0.0") // Reemplaza con la última versión
+    implementation ("com.google.android.gms:play-services-maps:19.0.0")
     implementation ("com.google.android.gms:play-services-location:19.0.0")
     implementation ("com.google.android.libraries.places:places:3.3.0")
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
     implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
+    implementation ("com.google.maps.android:android-maps-utils:2.3.0")
+    implementation ("com.google.maps.android:maps-utils-ktx:3.4.0")
 
 }

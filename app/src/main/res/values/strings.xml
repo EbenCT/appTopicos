@@ -20,10 +20,10 @@
     <string name="DIALOGFLOW_NAME_PROJECT">detector-de-billetes-vtnl</string>
 
     <!--CONEXION GOOGLE MAPS-->
-    <string name="google_maps_key" templateMergeStrategy="preserve">AIzaSyALnVdK51wX_xFlKx5lDxZHxkrr-wdm9Aw</string>
+    <string name="google_maps_key" templateMergeStrategy="preserve">AIzaSyDLukqZbdg0D_nmuecPPcNbpNcO1NOoP7w</string>
 
     <!--CONEXION GEMINI IA-->
     <string name="Url_API_GeminiIA">https://generativelanguage.googleapis.com/</string>
-    <string name="API_GEMINI_IA">AIzaSyDHoVrUXtuWLLVFHDlS8xumQFjL-_TS_Dg</string>
+    <string name="API_GEMINI_IA">AIzaSyALnVdK51wX_xFlKx5lDxZHxkrr-wdm9Aw</string>
 
 </resources>
