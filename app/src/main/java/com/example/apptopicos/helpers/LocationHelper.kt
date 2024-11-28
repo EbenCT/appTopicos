@@ -18,7 +18,6 @@ class LocationHelper(private val context: Context) {
             // Solicitar permisos al usuario
             return
         }
-
         fusedLocationClient.lastLocation
             .addOnSuccessListener { location: Location? ->
                 onLocationResult(location)
