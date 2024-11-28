@@ -24,6 +24,6 @@
 
     <!--CONEXION GEMINI IA-->
     <string name="Url_API_GeminiIA">https://generativelanguage.googleapis.com/</string>
-    <string name="API_GEMINI_IA">AIzaSyALnVdK51wX_xFlKx5lDxZHxkrr-wdm9Aw</string>
+    <string name="API_GEMINI_IA">AIzaSyDHoVrUXtuWLLVFHDlS8xumQFjL-_TS_Dg</string>
 
 </resources>

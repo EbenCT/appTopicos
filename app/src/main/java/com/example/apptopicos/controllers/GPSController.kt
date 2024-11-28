@@ -7,6 +7,7 @@ import android.widget.Toast
 import com.example.apptopicos.helpers.GeocoderHelper
 import com.example.apptopicos.helpers.LocationHelper
 import com.example.apptopicos.helpers.NavegationHelper
+import com.example.apptopicos.helpers.PlacesHelper
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -16,6 +17,7 @@ import java.util.Locale
 class GPSController(private val context: Context) : TextToSpeech.OnInitListener {
     private val locationHelper = LocationHelper(context)
     private val geocoderHelper = GeocoderHelper(context)
+    private val placesHelper = PlacesHelper(context)
     private var textToSpeech: TextToSpeech? = null
     private var navigationManager: NavegationHelper? = null
 
@@ -65,39 +67,60 @@ class GPSController(private val context: Context) : TextToSpeech.OnInitListener 
     }
 
     fun iniciarNavegacion(mensaje: String) {
-        // Extraer el destino del mensaje
         val destino = extraerDestino(mensaje)
-        Log.d("NavegadorGPS", "Destino: $destino")
-        // Obtener la ubicación actual
-        locationHelper.getCurrentLocation { location ->
-            if (location != null) {
-                val origin = LatLng(location.latitude, location.longitude)
+        Log.d("GPSController", "Destino recibido: $destino")
 
-                // Iniciar la navegación
-                navigationManager?.startNavigation(
-                    origin = origin,
-                    destination = destino,
-                    onError = { error ->
-                        GlobalScope.launch(Dispatchers.Main) {
-                            comunicarPorVoz("Lo siento, hubo un error: $error")
-                            Log.d("NavegadorGPS", "Lo siento, hubo un error: $error")
-                        }
+        placesHelper.buscarLugares(destino, { lugares ->
+            if (lugares.isNotEmpty()) {
+                comunicarOpcionesDestino(lugares) { lugarSeleccionado ->
+                    obtenerUbicacionActual { ubicacionActual ->
+                        navigationManager?.startNavigation(
+                            origin = ubicacionActual,
+                            destination = lugarSeleccionado.latLng,
+                            onError = { error ->
+                                comunicarPorVoz("Error al iniciar la navegación: $error")
+                                Log.d("GPSController", "Error: $error")
+                            }
+                        )
                     }
-                )
+                }
             } else {
-                comunicarPorVoz("No se pudo obtener tu ubicación actual. Por favor, verifica que el GPS esté activado")
-                Log.d("NavegadorGPS", "No se pudo obtener tu ubicación actual. Por favor, verifica que el GPS esté activado")
+                comunicarPorVoz("No se encontraron lugares para '$destino'. Intenta con otro destino.")
             }
-        }
+        }, { error ->
+            comunicarPorVoz("Hubo un problema al buscar lugares: $error")
+        })
+    }
+
+    private fun comunicarOpcionesDestino(
+        lugares: List<PlacesHelper.PlaceResult>,
+        onLugarSeleccionado: (PlacesHelper.PlaceResult) -> Unit
+    ) {
+        val nombres = lugares.map { it.nombre }
+        comunicarPorVoz("Se encontraron los siguientes lugares: ${nombres.joinToString(", ")}")
+
+        // Aquí puedes implementar la lógica para mostrar una lista al usuario y permitir la selección.
+        // Simularemos que el usuario selecciona el primer lugar.
+        val lugarSeleccionado = lugares.first()
+        comunicarPorVoz("Seleccionaste: ${lugarSeleccionado.nombre}")
+        onLugarSeleccionado(lugarSeleccionado)
     }
 
     private fun extraerDestino(mensaje: String): String {
-        // Aquí puedes implementar la lógica para extraer el destino del mensaje
-        // Por ejemplo, si el mensaje es "quiero ir a Plaza Mayor"
-        return mensaje.toLowerCase().replace("quiero ir a ", "")
+        return mensaje.lowercase().replace("quiero ir a ", "")
             .replace("llevame a ", "")
             .replace("como llego a ", "")
             .trim()
+    }
+
+    private fun obtenerUbicacionActual(onUbicacionObtenida: (LatLng) -> Unit) {
+        locationHelper.getCurrentLocation { location ->
+            if (location != null) {
+                onUbicacionObtenida(LatLng(location.latitude, location.longitude))
+            } else {
+                comunicarPorVoz("No se pudo obtener tu ubicación actual. Verifica el GPS.")
+            }
+        }
     }
 
     fun liberarRecursos() {
