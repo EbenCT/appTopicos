@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">AppTopicos</string>
+    <string name="app_name">SenseApp</string>
     <string name="title_activity_view_button">ViewButton</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
@@ -14,7 +14,7 @@
     <string name="FRASE_NAVEGACION">lugar deseas ir</string>
 
     <!--CONEXION IP-->
-    <string name="IP_CONNECTION">http://192.168.80.243:5000/upload_image</string>
+    <string name="IP_CONNECTION">http://192.168.55.243:5000/upload_image</string>
 
     <!--CONEXION DIALOG FLOW-->
     <string name="DIALOGFLOW_NAME_PROJECT">detector-de-billetes-vtnl</string>

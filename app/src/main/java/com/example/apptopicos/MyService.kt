@@ -181,7 +181,7 @@ class MyService : Service() {
         Log.d("MiApp", "Iniciando servicio en primer plano") // Log para servicio en primer plano
         val notification = NotificationCompat.Builder(this, "running_channel")
             .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle("Servicio activo")
+            .setContentTitle("SenseApp activo")
             .setContentText("Monitoreando el volumen")
             .build()
         startForeground(1, notification)
