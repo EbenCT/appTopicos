@@ -14,7 +14,7 @@
     <string name="FRASE_NAVEGACION">lugar deseas ir</string>
 
     <!--CONEXION IP-->
-    <string name="IP_CONNECTION">http://192.168.55.243:5000/upload_image</string>
+    <string name="IP_CONNECTION">http://137.184.196.80:5000/upload_image</string>
 
     <!--CONEXION DIALOG FLOW-->
     <string name="DIALOGFLOW_NAME_PROJECT">detector-de-billetes-vtnl</string>
@@ -24,6 +24,6 @@
 
     <!--CONEXION GEMINI IA-->
     <string name="Url_API_GeminiIA">https://generativelanguage.googleapis.com/</string>
-    <string name="API_GEMINI_IA">AIzaSyDHoVrUXtuWLLVFHDlS8xumQFjL-_TS_Dg</string>
+    <string name="API_GEMINI_IA">AIzaSyALnVdK51wX_xFlKx5lDxZHxkrr-wdm9Aw</string>
 
 </resources>
